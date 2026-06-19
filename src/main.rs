@@ -1,42 +1,59 @@
-mod user;
+use std::io;
+use std::io::BufRead;
 
-use axum::{Json, Router, debug_handler, routing::get, routing::post};
-use std::net::SocketAddr;
-use user::CreateUserRequest;
-use user::User;
-use user::UserResponse;
+fn main() {
+    let x: i32 = read_number();
+    let y: i32 = read_number();
+    let op: &str = &read_line();
 
-#[debug_handler]
-async fn get_user() -> Json<UserResponse> {
-    println!("[get-user-handler] Request recieved");
-    let user = User::new("Test".to_string(), "test@email.com".to_string());
-
-    return Json(UserResponse {
-        name: user.get_name().to_string(),
-        email: user.get_email().to_string(),
-    });
+    println!("= {}", handle_operand(op, x, y));
 }
 
-async fn create_user(Json(payload): Json<CreateUserRequest>) -> Json<UserResponse> {
-    println!("[create-user-handler] Request received: {}", payload.name);
-    let user = User::new(payload.name, payload.email);
 
-    return Json(UserResponse {
-        name: user.get_name().to_string(),
-        email: user.get_email().to_string(),
-    });
+fn read_number() -> i32 {
+    let stdin = io::stdin();
+    let line = stdin.lock().lines().next().unwrap().unwrap();
+    let trimmed = line.trim().to_string();
+
+    match trimmed.parse::<i32>() {
+        Ok(..) => trimmed.parse().unwrap(),
+        Err(..) => panic!("input is not an integer: {}", trimmed),
+    }
 }
 
-#[tokio::main]
-async fn main() {
-    let app = Router::new()
-        .route("/users", get(get_user))
-        .route("/users", post(create_user));
+fn read_line() -> String {
+    let stdin = io::stdin();
+    let line = stdin.lock().lines().next().unwrap().unwrap();
+    let trimmed = line.trim().to_string();
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
-    println!("Server running on {}", addr);
-
-    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
-
-    axum::serve(listener, app).await.unwrap();
+    match trimmed.parse::<String>() {
+        Ok(..) => trimmed.parse().unwrap(),
+        Err(..) => panic!("input is not an integer: {}", trimmed),
+    }
 }
+fn handle_operand(operand: &str, x: i32, y: i32) -> i32{
+    match operand{
+        "+" => add(x, y),
+        "-" => sub(x, y),
+        "*" => mul(x, y),
+        "/" => div(x, y),
+        _ => panic!("Invalid operand: {}", operand),
+    }
+}
+
+fn add(x: i32, y: i32) -> i32{
+    x + y
+}
+
+fn sub(x: i32, y: i32) -> i32{
+    x - y
+}
+
+fn mul(x: i32, y: i32) -> i32{
+    x * y
+}
+
+fn div(x: i32, y: i32) -> i32{
+    x / y
+}
+
