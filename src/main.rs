@@ -1,59 +1,59 @@
+mod calculator;
+
 use std::io;
-use std::io::BufRead;
+use std::io::Write;
+use crate::calculator::Calculator;
 
 fn main() {
-    let x: i32 = read_number();
-    let y: i32 = read_number();
-    let op: &str = &read_line();
+    print_ascii();
+    let calculator = Calculator::new();
 
-    println!("= {}", handle_operand(op, x, y));
+    let operands = calculator.get_operands();
+
+    let x = read_number("Enter first number: ");
+    let y = read_number("Enter second number: ");
+    println!("\nAvailable operations: {:?}", operands.as_slice());
+    let op = read_line("Enter operand: ");
+
+    println!("= {}", calculator.handle_operand(&op, x, y));
 }
 
+fn print_ascii() {
+    let art = r#"
+    __________                __   _________        .__
+\______   \__ __  _______/  |_ \_   ___ \_____  |  |   ____
+ |       _/  |  \/  ___/\   __\/    \  \/\__  \ |  | _/ ___\
+ |    |   \  |  /\___ \  |  |  \     \____/ __ \|  |_\  \___
+ |____|_  /____//____  > |__|   \______  (____  /____/\___  >
+        \/           \/                \/     \/          \/
+    "#;
 
-fn read_number() -> i32 {
-    let stdin = io::stdin();
-    let line = stdin.lock().lines().next().unwrap().unwrap();
-    let trimmed = line.trim().to_string();
-
-    match trimmed.parse::<i32>() {
-        Ok(..) => trimmed.parse().unwrap(),
-        Err(..) => panic!("input is not an integer: {}", trimmed),
-    }
+    println!("{}", art);
 }
 
-fn read_line() -> String {
-    let stdin = io::stdin();
-    let line = stdin.lock().lines().next().unwrap().unwrap();
-    let trimmed = line.trim().to_string();
+fn read_number(prompt: &str) -> i32 {
+    let mut input = String::new();
 
-    match trimmed.parse::<String>() {
-        Ok(..) => trimmed.parse().unwrap(),
-        Err(..) => panic!("input is not an integer: {}", trimmed),
-    }
-}
-fn handle_operand(operand: &str, x: i32, y: i32) -> i32{
-    match operand{
-        "+" => add(x, y),
-        "-" => sub(x, y),
-        "*" => mul(x, y),
-        "/" => div(x, y),
-        _ => panic!("Invalid operand: {}", operand),
-    }
+    print!("{}", prompt);
+    io::stdout().flush().unwrap();
+
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read input");
+
+    input.trim().parse().expect("Not a valid integer")
 }
 
-fn add(x: i32, y: i32) -> i32{
-    x + y
-}
+fn read_line(prompt: &str) -> String {
+    let mut input = String::new();
 
-fn sub(x: i32, y: i32) -> i32{
-    x - y
-}
+    print!("{}", prompt);
+    io::stdout().flush().unwrap();
 
-fn mul(x: i32, y: i32) -> i32{
-    x * y
-}
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read input");
 
-fn div(x: i32, y: i32) -> i32{
-    x / y
+    input.trim().to_string()
 }
 
